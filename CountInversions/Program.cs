@@ -9,18 +9,24 @@ namespace CountInversions
     {
         static void Main(string[] args)
         {
+            //var paths = new[]
+            //{
+            //    "mytest2.txt",
+            //    "mytest.txt",
+            //    "pa-cases-1.txt",
+            //    "pa-cases-2.txt",
+            //    "pa-cases-3.txt",
+            //    "pa-cases-4.txt",
+            //    "pa-cases-5.txt",
+            //    "pa-cases-6.txt",
+            //    "pa-cases-7.txt"
+            //};
+
             var paths = new[]
             {
-                "mytest2.txt",
-                "mytest.txt",
-                "pa-cases-1.txt",
-                "pa-cases-2.txt",
-                "pa-cases-3.txt",
-                "pa-cases-4.txt",
-                "pa-cases-5.txt",
-                "pa-cases-6.txt",
-                "pa-cases-7.txt"
+                "input-week1.txt"
             };
+            
 
             var testCases = new TestCase[paths.Length];
 
@@ -48,10 +54,10 @@ namespace CountInversions
             {
                 Console.WriteLine($"test case: {testCase.FilePath}");
 
-                int inversionsCount;
+                long inversionsCount;
                 SortAndCount(testCase.Input, 0, out inversionsCount);
                 Console.WriteLine($"Expected: {testCase.InversionsCount}, Actual: {inversionsCount}");
-                if (testCase.InversionsCount != inversionsCount)
+                if (testCase.InversionsCount != inversionsCount && testCase.InversionsCount != -1)
                 {
                     throw new Exception($"Test case {testCase.FilePath} failed!");
                 }
@@ -68,8 +74,8 @@ namespace CountInversions
             var lines = text.Split('\n');
 
             answer = -1;
-            var nonEmptyLinesCount = lines.Count(x => !string.IsNullOrWhiteSpace(x));
-            input = new int[nonEmptyLinesCount - 1]; // the last one is answer!
+            var onlyDataLinesCount = lines.Count(x => !string.IsNullOrWhiteSpace(x) && !x.ToLower().Contains("ans"));
+            input = new int[onlyDataLinesCount];
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -87,9 +93,9 @@ namespace CountInversions
             }
         }
 
-        private static int[] SortAndCount(int[] input, int level, out int initialCount)
+        private static int[] SortAndCount(int[] input, int level, out long initialCount)
         {
-            Console.WriteLine($"level = {level}");
+            //Console.WriteLine($"level = {level}");
             if (input.Length == 1)
             {
                 initialCount = 0;
@@ -116,21 +122,21 @@ namespace CountInversions
 
             var left = new int[middlePosition];
             Array.Copy(input, 0, left, 0, left.Length);
-            int leftInversionsCount;
+            long leftInversionsCount;
             var leftSorted = SortAndCount(left, level + 1,  out leftInversionsCount);
 
             var right = new int[input.Length - left.Length];
             Array.Copy(input, middlePosition, right, 0, right.Length);
-            int rightInversionsCount;
+            long rightInversionsCount;
             var rightSorted = SortAndCount(right, level + 1, out rightInversionsCount);
-            int splitInversionsCount;
+            long splitInversionsCount;
             var fullSorted = CountSplitInversions(leftSorted, rightSorted, out splitInversionsCount);
 
             initialCount = (leftInversionsCount + rightInversionsCount + splitInversionsCount);
             return fullSorted;
         }
 
-        private static int[] CountSplitInversions(int[] leftSorted, int[] rightSorted, out int splitInversionsCount)
+        private static int[] CountSplitInversions(int[] leftSorted, int[] rightSorted, out long splitInversionsCount)
         {
             var totalLength = leftSorted.Length + rightSorted.Length;
             var result = new int[totalLength];
