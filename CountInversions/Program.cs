@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -8,22 +9,82 @@ namespace CountInversions
     {
         static void Main(string[] args)
         {
-            var paths = new[] { "mytest2.txt" };
-
-            foreach (var path in paths)
+            var paths = new[]
             {
-                Console.WriteLine($"test case: {path}");
+                "mytest2.txt",
+                "mytest.txt",
+                "pa-cases-1.txt",
+                "pa-cases-2.txt",
+                "pa-cases-3.txt",
+                "pa-cases-4.txt",
+                "pa-cases-5.txt",
+                "pa-cases-6.txt",
+                "pa-cases-7.txt"
+            };
+
+            var testCases = new TestCase[paths.Length];
+
+            for (int index = 0; index < paths.Length; index++)
+            {
+                var path = paths[index];
                 using (var file = File.OpenText(path))
                 {
                     var text = file.ReadToEnd();
-                    var input = text.Split('\n').Select(int.Parse).ToArray();
-                    int inversionsCount;
-                    SortAndCount(input, 0, out inversionsCount);
-                    Console.WriteLine($"Inversions count = {inversionsCount}");
+
+                    int[] input;
+                    int answer;                    
+                    ProcessTestCaseText(text, out input, out answer);
+
+                    testCases[index] = new TestCase
+                    {
+                        FilePath = path,
+                        Input = input,
+                        InversionsCount = answer
+                    };
+                }
+            }
+
+            foreach (var testCase in testCases)
+            {
+                Console.WriteLine($"test case: {testCase.FilePath}");
+
+                int inversionsCount;
+                SortAndCount(testCase.Input, 0, out inversionsCount);
+                Console.WriteLine($"Expected: {testCase.InversionsCount}, Actual: {inversionsCount}");
+                if (testCase.InversionsCount != inversionsCount)
+                {
+                    throw new Exception($"Test case {testCase.FilePath} failed!");
                 }
                 Console.WriteLine("-------------------");
                 Console.WriteLine();
-            }            
+            }
+
+            Console.WriteLine("the end");
+            Console.ReadKey();
+        }
+
+        private static void ProcessTestCaseText(string text, out int[] input, out int answer)
+        {
+            var lines = text.Split('\n');
+
+            answer = -1;
+            var nonEmptyLinesCount = lines.Count(x => !string.IsNullOrWhiteSpace(x));
+            input = new int[nonEmptyLinesCount - 1]; // the last one is answer!
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(lines[i]))
+                {
+
+                    if (lines[i].ToLower().Contains("ans"))
+                    {      
+                        answer = int.Parse(lines[i].Split('-')[1].Trim());
+                        return;            
+                    }
+
+                    input[i] = int.Parse(lines[i]);
+                }
+            }
         }
 
         private static int[] SortAndCount(int[] input, int level, out int initialCount)
@@ -100,13 +161,13 @@ namespace CountInversions
                     else if (leftSorted[i] > rightSorted[j])
                     {
                         result[index] = rightSorted[j];
-                        splitInversionsCount += (leftSorted.Length - i - 1);
+                        splitInversionsCount += (leftSorted.Length - i);
                         j++;
                     }
                     else
                     {
                         result[index] = rightSorted[j];
-                        splitInversionsCount += (leftSorted.Length - i - 1);
+                        splitInversionsCount += (leftSorted.Length - i);
                         j++;
                     }
                 }
