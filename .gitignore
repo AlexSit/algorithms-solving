@@ -1,0 +1,5 @@
+/.vs/Algorithms/v14/*.suo
+/.vs/BinarySearch/v14/*.suo
+*.suo
+*.exe
+Debug
