@@ -34,8 +34,8 @@ namespace CountInversions
 
                 long inversionsCount;
                 SortAndCount(testCase.Input, 0, out inversionsCount);
-                Console.WriteLine($"Expected: {testCase.InversionsCount}, Actual: {inversionsCount}");
-                if (testCase.InversionsCount != inversionsCount && testCase.InversionsCount != -1)
+                Console.WriteLine($"Expected: {testCase.Answer}, Actual: {inversionsCount}");
+                if (testCase.Answer != inversionsCount && testCase.Answer != -1)
                 {
                     throw new Exception($"Test case {testCase.FilePath} failed!");
                 }

@@ -48,8 +48,8 @@ namespace QuickSort
                 long comparisonsCount;
                 var input = testCase.Input;
                 QsortCountingComparisons(input, pivotType, 0, 0, input.Length - 1, out comparisonsCount);
-                Console.WriteLine($"Expected: {testCase.InversionsCount}, Actual: {comparisonsCount}");
-                if (testCase.InversionsCount != comparisonsCount && testCase.InversionsCount != -1)
+                Console.WriteLine($"Expected: {testCase.Answer}, Actual: {comparisonsCount}");
+                if (testCase.Answer != comparisonsCount && testCase.Answer != -1)
                 {
                     throw new Exception($"Test case {testCase.FilePath} failed!");
                 }

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Common
@@ -24,7 +26,7 @@ namespace Common
                     {
                         FilePath = path,
                         Input = input,
-                        InversionsCount = answer
+                        Answer = answer
                     };
                 }
             }
@@ -56,3 +58,4 @@ namespace Common
         }
     }
 }
+
