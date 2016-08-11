@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,20 +8,23 @@ namespace SCC
 {
     class Program
     {
-        private static int _t = 0;
+        private static int _t;
         private static Dictionary<int, int> _finishingTimes = new Dictionary<int, int>();
-        private static int _currentLeaderNumber = 0;
+        private static int _currentLeaderNumber;
         private static int[] _leaders;
 
         private static List<NodeInfo> _convertedInput;
         private static int _convertedInputMax;
         
         //private static NodeInfo[] _reversedInput;
-        private static int[] _answer = new int[5]; 
+        private static int[] _answer = new int[5];
+
+        private static int _currentDfsNumber;
+        private static int _currentDfsReversedNumber;
 
         static void Main(string[] args)
         {
-            var stackSize = 10*000*000;
+            var stackSize = 50*000*000;
             var thread = new Thread(Target, stackSize);
             thread.Start();
         }
@@ -34,9 +36,9 @@ namespace SCC
             {
                 //"tc1.txt",
                 //"tc2.txt",
-                "tc3.txt",
+                //"tc3.txt",
                 //"tc4.txt",
-                //"input.txt"
+                "input.txt"
             };
 
             var testCases = new List<TestCase>();
@@ -76,7 +78,7 @@ namespace SCC
 
             Console.WriteLine($"test case: {testCase.FilePath}");
 
-            int[] actualAnswer = null;
+            int[] actualAnswer;
             
             //var log = "";
             try
@@ -214,7 +216,7 @@ namespace SCC
             //    }
             //}
 
-            _convertedInputMax = _convertedInput.Max(x => x.I);
+            _convertedInputMax = convertedInput.Max(x => x.I);
             return convertedInput.OrderBy(x=>x.I).ToList();            
         }
 
@@ -225,27 +227,29 @@ namespace SCC
             {
                 if (!_convertedInput[i - 1].Explored)
                 {
-                    DfsReversed(i);
+                    _currentDfsReversedNumber = i;
+                    DfsReversed();
                 }
             }
         }
 
-        private static void DfsReversed(int i)
+        private static void DfsReversed()
         {
-            var node = _convertedInput[i - 1];
+            var node = _convertedInput[_currentDfsReversedNumber - 1];
             node.Explored = true;
             //NOTE
-            var destinationNodes = _convertedInput.Where(x => x.DestinationNodes.Contains(i)); //            var destinationNodes = _convertedInput[i-1].DestinationNodes;
+            var destinationNodes = _convertedInput.Where(x => x.DestinationNodes.Contains(_currentDfsReversedNumber)); //            var destinationNodes = _convertedInput[i-1].DestinationNodes;
             foreach (var dstNodeIndex in destinationNodes)
             {
                 var dstNode = _convertedInput[dstNodeIndex.I - 1];
                 if (!dstNode.Explored)
                 {
-                    DfsReversed(dstNodeIndex.I);
+                    _currentDfsReversedNumber = dstNodeIndex.I;
+                    DfsReversed();
                 }
             }
             _t++;            
-            _finishingTimes[_t] = i;
+            _finishingTimes[_t] = _currentDfsReversedNumber;
             if (_t < 1000 && _t % 100 == 0)
             {
                 Console.WriteLine(_t);
@@ -260,17 +264,18 @@ namespace SCC
             }
         }
 
-        private static void Dfs(int i)
+        private static void Dfs()
         {
-            var node = _convertedInput[i - 1];
+            var node = _convertedInput[_currentDfsNumber - 1];
             node.Explored = true;
-            _leaders[i - 1] = _currentLeaderNumber;
+            _leaders[_currentDfsNumber - 1] = _currentLeaderNumber;
             foreach (var dstNodeIndex in node.DestinationNodes)
             {
                 var dstNode = _convertedInput[dstNodeIndex - 1];
                 if (!dstNode.Explored)
                 {
-                    Dfs(dstNodeIndex);
+                    _currentDfsNumber = dstNodeIndex;
+                    Dfs();
                 }
             }            
         }
@@ -280,13 +285,13 @@ namespace SCC
             _currentLeaderNumber = 0;
             var maxFinishingTime = _convertedInputMax; //_finishingTimes.Keys.Max();
             for (var finishingTime = maxFinishingTime; finishingTime >= 1; finishingTime--)
-            {
-                //NOTE - можно сделать финиш. время ключом
+            {                
                 var i = _finishingTimes[finishingTime];
                 if (!_convertedInput[i - 1].Explored)
                 {
                     _currentLeaderNumber = finishingTime;
-                    Dfs(i);
+                    _currentDfsNumber = i;
+                    Dfs();
                 }
             }
         }
