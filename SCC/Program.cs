@@ -11,41 +11,37 @@ namespace SCC
         private static int _t;
         private static Dictionary<int, int> _finishingTimes = new Dictionary<int, int>();
         private static int _currentLeaderNumber;
-        private static int[] _leaders;
+        private static Dictionary<int, List<int>> _leaders = new Dictionary<int, List<int>>();
 
-        private static List<NodeInfo> _convertedInput;
-        private static int _convertedInputMaxReversed;
-        private static int _convertedInputMaxForward;
+        private static Dictionary<int, NodeInfo> _convertedInput;
                 
         private static int[] _answer = new int[5];
 
-        //private static int _currentDfsNumber;
-        //private static int _currentDfsReversedNumber;
-
-        static void Main(string[] args)
-        {
-            var stackSize = 50*000*000;
+        static void Main(string[] args){
+            var stackSize = 100 * 1000 * 1000;
             var thread = new Thread(Target, stackSize);
             thread.Start();
+            thread.Join();
         }
 
         private static void Target()
         {
-            Console.WriteLine("START START START");            
+            Console.WriteLine("START START START");
+            var basePath = "../../inputs";
             var paths = new List<string>
-            {
-                "../../inputs/tc1.txt",
-                "../../inputs/tc2.txt",
-                //"../../inputs/tc3.txt",
-                "../../inputs/tc4.txt",
-                //"../../inputs/input.txt"
+            {                
+                //"tc1.txt",
+                //"tc2.txt",
+                //"tc3.txt",
+                //"tc4.txt",
+                "input.txt"
             };
 
             var testCases = new List<TestCase>();
 
             foreach (var path in paths)
             {
-                using (var file = File.OpenText(path))
+                using (var file = File.OpenText(Path.Combine(basePath, path)))
                 {
                     var text = file.ReadToEnd();
 
@@ -88,19 +84,30 @@ namespace SCC
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
                 return;
             }
         
             if (actualAnswer == null)
             {
                 throw new Exception("Couldn't find the answer!");
+            }           
+
+            if (testCase.Answer != null)
+            {
+                if (!testCase.Answer.SequenceEqual(actualAnswer) && testCase.Answer != null)
+                {
+                    throw new Exception($"Test case {testCase.FilePath} failed!");
+                }
+                Console.WriteLine(
+                    $"Expected: {string.Join(", ", testCase.Answer)}, Actual: {string.Join(", ", actualAnswer)}");
+            }
+            else
+            {
+                Console.WriteLine(
+                    $"Actual: {string.Join(", ", actualAnswer)}");
             }
 
-            Console.WriteLine($"Expected: {string.Join(", ", testCase.Answer)}, Actual: {string.Join(", ", actualAnswer)}");
-            if (!testCase.Answer.SequenceEqual(actualAnswer) && testCase.Answer != null)
-            {
-                throw new Exception($"Test case {testCase.FilePath} failed!");
-            }
             Console.WriteLine("-------------------");
             Console.WriteLine();
         }
@@ -109,6 +116,7 @@ namespace SCC
         {
             _t = 0;
             _finishingTimes = new Dictionary<int, int>();
+            _leaders.Clear();
             _currentLeaderNumber = 0;
 
             _answer = new int[5];
@@ -117,8 +125,13 @@ namespace SCC
         private static void Scc(List<Tuple<int, int>> input)
         {
             _convertedInput = PrepareInputForFinishingTimes(input);
-            _leaders = new int[_convertedInput.Count];
-
+            for (int i = 0; i < _convertedInput.Keys.Count; i++)
+            {
+                if (!_convertedInput.ContainsKey(i + 1))
+                {
+                    throw new Exception("Обратите внимание!");
+                }
+            }
             DfsForFinishingTimes();
 
             Console.WriteLine("\n --- Finishing times done --- \n");
@@ -129,109 +142,136 @@ namespace SCC
             CollectTop5Leaders();
         }
 
-        private static List<NodeInfo> PrepareInputForFinishingTimes(List<Tuple<int, int>> input)
-        {            
-            var convertedInput = input.GroupBy(x => x.Item2, x => x.Item1, (key, values) => new NodeInfo
+        private static Dictionary<int, NodeInfo> PrepareInputForFinishingTimes(List<Tuple<int, int>> input)
+        {
+            var convertedInput = input.GroupBy(x => x.Item2, x => x.Item1, (key, values) => new
             {
                 I = key,
-                Explored = false,
                 DestinationNodes = values.ToArray()
             })
-            .ToList();
+                .OrderBy(x => x.I).ToList();
 
-            //var count = convertedInput.Count;
-            //for (int i = 0; i < count; i++)
-            //{
-            //    if (convertedInput[i].I != i + 1)
-            //    {
-            //        convertedInput.Insert(i, new NodeInfo
-            //        {
-            //            I = i + 1,
-            //            Explored = false,
-            //            DestinationNodes = new int[0]
-            //        });
-            //        count++;
-            //    }
-            //}
+            var maxItem1 = input.Max(x=>x.Item1);
+            var maxItem2 = input.Max(x => x.Item2);
+            var maxNodeNumber = Math.Max(maxItem1, maxItem2);
 
-            _convertedInputMaxReversed = convertedInput.Max(x => x.I);
-            return convertedInput.OrderBy(x => x.I).ToList();
+            var count = convertedInput.Count;            
+            for (int i = 0; i < count; i++)
+            {
+                if (convertedInput[i].I != i + 1)
+                {
+                    convertedInput.Insert(i, new 
+                    {
+                        I = i + 1,                        
+                        DestinationNodes = new int[0]
+                    });
+                    count++;
+                }
+            }
+
+            if (maxNodeNumber > count)
+            {
+                for (int i = count + 1; i <= maxNodeNumber; i++)
+                {
+                    convertedInput.Add(new
+                    {
+                        I = i,
+                        DestinationNodes = new int[0]
+                    });
+                }
+            }
+
+            return convertedInput.OrderBy(x => x.I)
+                .ToDictionary(x => x.I, x => new NodeInfo
+                {
+                    Explored = false,
+                    DestinationNodes = x.DestinationNodes
+                });
         }
 
         private static void CollectTop5Leaders()
         {
-            var leaders = new Dictionary<int, List<int>>();
-            for (int i = 0; i < _leaders.Length; i++)
-            {
-                if (!leaders.ContainsKey(_leaders[i]))
-                {
-                    leaders[_leaders[i]] = new List<int>();
-                }
-
-                leaders[_leaders[i]].Add(i+1);
-            }
-
-            var topLeaders = leaders.OrderByDescending(x => x.Value.Count).Take(5).ToList();
+            var topLeaders = _leaders.OrderByDescending(x => x.Value.Count).Take(5).ToList();
             for (int i = 0; i < topLeaders.Count; i++)
             {
                 _answer[i] = topLeaders[i].Value.Count;
             }
         }
 
-        private static List<NodeInfo> PrepareInputForScc(List<Tuple<int, int>> input)
+        private static Dictionary<int, NodeInfo> PrepareInputForScc(List<Tuple<int, int>> input)
         {            
-            var convertedInput = input.GroupBy(x => x.Item1, x=>x.Item2, (key, values) => new NodeInfo
+            var convertedInput = input.GroupBy(x => x.Item1, x=>x.Item2, (key, values) => new
             {
-                I = key,
-                Explored = false,
+                I = key,                
                 DestinationNodes = values.ToArray()
             })
             .ToList();
+
+            var maxItem1 = input.Max(x => x.Item1);
+            var maxItem2 = input.Max(x => x.Item2);
+            var maxNodeNumber = Math.Max(maxItem1, maxItem2);
 
             var count = convertedInput.Count;
             for (int i = 0; i < count; i++)
             {
                 if (convertedInput[i].I != i + 1)
                 {
-                    convertedInput.Insert(i, new NodeInfo
+                    convertedInput.Insert(i, new
                     {
-                        I = i+1,
-                        Explored = false,
+                        I = i + 1,
                         DestinationNodes = new int[0]
                     });
                     count++;
                 }
-            }            
+            }
 
-            _convertedInputMaxForward = convertedInput.Max(x => x.I);
-            return convertedInput.OrderBy(x=>x.I).ToList();            
+            if (maxNodeNumber > count)
+            {
+                for (int i = count + 1; i <= maxNodeNumber; i++)
+                {
+                    convertedInput.Add(new
+                    {
+                        I = i,
+                        DestinationNodes = new int[0]
+                    });
+                }
+            }
+
+            return convertedInput.OrderBy(x=>x.I)
+                .ToDictionary(x => x.I, x => new NodeInfo
+            {
+                Explored = false,
+                DestinationNodes = x.DestinationNodes
+            });
         }
 
         private static void DfsForFinishingTimes()
         {
             _t = 0;
-            for (var i = _convertedInputMaxReversed; i >= 1; i--)
+            var keysFromLargestToSmallest = _convertedInput.Keys.OrderByDescending(x => x);
+            foreach(var key in keysFromLargestToSmallest) // (var i = _convertedInputMaxReversed; i >= 1; i--)
             {
-                if (!_convertedInput[i - 1].Explored)
+                if (!_convertedInput[key].Explored)
                 {                    
-                    DfsReversed(i);
+                    DfsReversed(key);
                 }
             }
         }
 
         private static void DfsReversed(int i)
         {
-            var node = _convertedInput[i - 1];
+            var node = _convertedInput[i];
             node.Explored = true;
 
             var destinationNodes = node.DestinationNodes; // _convertedInput.Where(x => x.DestinationNodes.Contains(_currentDfsReversedNumber));
+            //Console.WriteLine($"node: {i}, dstNodes: {string.Join(", ", destinationNodes)}");
             foreach (var dstNodeIndex in destinationNodes)
             {
-                var dstNode = _convertedInput[dstNodeIndex - 1]; //_convertedInput[dstNodeIndex.I - 1];
-                if (!dstNode.Explored)
-                {                    
-                    DfsReversed(dstNodeIndex);
-                }
+                    var dstNode = _convertedInput[dstNodeIndex]; //_convertedInput[dstNodeIndex.I - 1];
+                    if (!dstNode.Explored)
+                    {
+                        DfsReversed(dstNodeIndex);
+                    }
             }
             _t++;            
             _finishingTimes[_t] = i;
@@ -240,16 +280,23 @@ namespace SCC
 
         private static void Dfs(int i)
         {
-            var node = _convertedInput[i - 1];
+            var node = _convertedInput[i];
             node.Explored = true;
-            _leaders[i - 1] = _currentLeaderNumber;
+            if (!_leaders.ContainsKey(_currentLeaderNumber))
+            {
+                _leaders.Add(_currentLeaderNumber, new List<int>());
+            }
+            _leaders[_currentLeaderNumber].Add(i);
             foreach (var dstNodeIndex in node.DestinationNodes)
             {
-                var dstNode = _convertedInput[dstNodeIndex - 1];
-                if (!dstNode.Explored)
-                {                    
-                    PrintIntermediateResult(dstNodeIndex);
-                    Dfs(dstNodeIndex);
+                if (_convertedInput.ContainsKey(dstNodeIndex))
+                {
+                    var dstNode = _convertedInput[dstNodeIndex];
+                    if (!dstNode.Explored)
+                    {
+                        PrintIntermediateResult(dstNodeIndex);
+                        Dfs(dstNodeIndex);
+                    }
                 }
             }
         }
@@ -257,13 +304,14 @@ namespace SCC
         private static void DfsForScc()
         {
             _currentLeaderNumber = 0;
-            var maxFinishingTime = _convertedInputMaxForward;
-            for (var finishingTime = maxFinishingTime; finishingTime >= 1; finishingTime--)
+
+            var finishingTimes = _finishingTimes.Keys.OrderByDescending(x => x);
+            foreach (var finishingTime in finishingTimes)
             {                
                 var i = _finishingTimes[finishingTime];
-                if (!_convertedInput[i - 1].Explored)
+                if (!_convertedInput[i].Explored)
                 {
-                    _currentLeaderNumber = finishingTime;                    
+                    _currentLeaderNumber = i;                    
                     Dfs(i);
                 }
             }
