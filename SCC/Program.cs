@@ -14,12 +14,13 @@ namespace SCC
         private static int[] _leaders;
 
         private static List<NodeInfo> _convertedInput;
-        private static int _convertedInputMax;
+        private static int _convertedInputMaxReversed;
+        private static int _convertedInputMaxForward;
                 
         private static int[] _answer = new int[5];
 
-        private static int _currentDfsNumber;
-        private static int _currentDfsReversedNumber;
+        //private static int _currentDfsNumber;
+        //private static int _currentDfsReversedNumber;
 
         static void Main(string[] args)
         {
@@ -153,7 +154,7 @@ namespace SCC
             //    }
             //}
 
-            _convertedInputMax = convertedInput.Max(x => x.I);
+            _convertedInputMaxReversed = convertedInput.Max(x => x.I);
             return convertedInput.OrderBy(x => x.I).ToList();
         }
 
@@ -202,26 +203,25 @@ namespace SCC
                 }
             }            
 
-            _convertedInputMax = convertedInput.Max(x => x.I);
+            _convertedInputMaxForward = convertedInput.Max(x => x.I);
             return convertedInput.OrderBy(x=>x.I).ToList();            
         }
 
         private static void DfsForFinishingTimes()
         {
             _t = 0;
-            for (var i = _convertedInputMax; i >= 1; i--)
+            for (var i = _convertedInputMaxReversed; i >= 1; i--)
             {
                 if (!_convertedInput[i - 1].Explored)
-                {
-                    _currentDfsReversedNumber = i;
-                    DfsReversed();
+                {                    
+                    DfsReversed(i);
                 }
             }
         }
 
-        private static void DfsReversed()
+        private static void DfsReversed(int i)
         {
-            var node = _convertedInput[_currentDfsReversedNumber - 1];
+            var node = _convertedInput[i - 1];
             node.Explored = true;
 
             var destinationNodes = node.DestinationNodes; // _convertedInput.Where(x => x.DestinationNodes.Contains(_currentDfsReversedNumber));
@@ -229,45 +229,42 @@ namespace SCC
             {
                 var dstNode = _convertedInput[dstNodeIndex - 1]; //_convertedInput[dstNodeIndex.I - 1];
                 if (!dstNode.Explored)
-                {
-                    _currentDfsReversedNumber = dstNodeIndex;
-                    DfsReversed();
+                {                    
+                    DfsReversed(dstNodeIndex);
                 }
             }
             _t++;            
-            _finishingTimes[_t] = _currentDfsReversedNumber;
+            _finishingTimes[_t] = i;
             PrintIntermediateResult(_t);
         }
 
-        private static void Dfs()
+        private static void Dfs(int i)
         {
-            var node = _convertedInput[_currentDfsNumber - 1];
+            var node = _convertedInput[i - 1];
             node.Explored = true;
-            _leaders[_currentDfsNumber - 1] = _currentLeaderNumber;
+            _leaders[i - 1] = _currentLeaderNumber;
             foreach (var dstNodeIndex in node.DestinationNodes)
             {
                 var dstNode = _convertedInput[dstNodeIndex - 1];
                 if (!dstNode.Explored)
-                {
-                    _currentDfsNumber = dstNodeIndex;
-                    PrintIntermediateResult(_currentDfsNumber);
-                    Dfs();
+                {                    
+                    PrintIntermediateResult(dstNodeIndex);
+                    Dfs(dstNodeIndex);
                 }
-            }            
+            }
         }
 
         private static void DfsForScc()
         {
             _currentLeaderNumber = 0;
-            var maxFinishingTime = _convertedInputMax;
+            var maxFinishingTime = _convertedInputMaxForward;
             for (var finishingTime = maxFinishingTime; finishingTime >= 1; finishingTime--)
             {                
                 var i = _finishingTimes[finishingTime];
                 if (!_convertedInput[i - 1].Explored)
                 {
-                    _currentLeaderNumber = finishingTime;
-                    _currentDfsNumber = i;                    
-                    Dfs();
+                    _currentLeaderNumber = finishingTime;                    
+                    Dfs(i);
                 }
             }
         }
