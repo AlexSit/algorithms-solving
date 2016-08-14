@@ -3,3 +3,7 @@
 *.suo
 *.exe
 Debug
+*.config
+*.pdb
+*.txt
+Release
