@@ -33,11 +33,11 @@ namespace SCC
             Console.WriteLine("START START START");            
             var paths = new List<string>
             {
-                //"tc1.txt",
-                //"tc2.txt",
-                //"tc3.txt",
-                //"tc4.txt",
-                "../../input.txt"
+                "../../inputs/tc1.txt",
+                "../../inputs/tc2.txt",
+                //"../../inputs/tc3.txt",
+                "../../inputs/tc4.txt",
+                //"../../inputs/input.txt"
             };
 
             var testCases = new List<TestCase>();
@@ -78,8 +78,7 @@ namespace SCC
             Console.WriteLine($"test case: {testCase.FilePath}");
 
             int[] actualAnswer;
-            
-            //var log = "";
+                        
             try
             {
                 Scc(testCase.Input);
@@ -116,15 +115,46 @@ namespace SCC
 
         private static void Scc(List<Tuple<int, int>> input)
         {
-            _convertedInput = PrepareInput(input);
+            _convertedInput = PrepareInputForFinishingTimes(input);
             _leaders = new int[_convertedInput.Count];
 
             DfsForFinishingTimes();
-            _convertedInput.ForEach(x => x.Explored = false);
 
+            Console.WriteLine("\n --- Finishing times done --- \n");
+            _convertedInput.Clear();
+            _convertedInput = PrepareInputForScc(input);            
             DfsForScc();
 
             CollectTop5Leaders();
+        }
+
+        private static List<NodeInfo> PrepareInputForFinishingTimes(List<Tuple<int, int>> input)
+        {            
+            var convertedInput = input.GroupBy(x => x.Item2, x => x.Item1, (key, values) => new NodeInfo
+            {
+                I = key,
+                Explored = false,
+                DestinationNodes = values.ToArray()
+            })
+            .ToList();
+
+            //var count = convertedInput.Count;
+            //for (int i = 0; i < count; i++)
+            //{
+            //    if (convertedInput[i].I != i + 1)
+            //    {
+            //        convertedInput.Insert(i, new NodeInfo
+            //        {
+            //            I = i + 1,
+            //            Explored = false,
+            //            DestinationNodes = new int[0]
+            //        });
+            //        count++;
+            //    }
+            //}
+
+            _convertedInputMax = convertedInput.Max(x => x.I);
+            return convertedInput.OrderBy(x => x.I).ToList();
         }
 
         private static void CollectTop5Leaders()
@@ -147,8 +177,8 @@ namespace SCC
             }
         }
 
-        private static List<NodeInfo> PrepareInput(List<Tuple<int, int>> input)
-        {
+        private static List<NodeInfo> PrepareInputForScc(List<Tuple<int, int>> input)
+        {            
             var convertedInput = input.GroupBy(x => x.Item1, x=>x.Item2, (key, values) => new NodeInfo
             {
                 I = key,
@@ -193,14 +223,14 @@ namespace SCC
         {
             var node = _convertedInput[_currentDfsReversedNumber - 1];
             node.Explored = true;
-            //NOTE
-            var destinationNodes = _convertedInput.Where(x => x.DestinationNodes.Contains(_currentDfsReversedNumber)); //            var destinationNodes = _convertedInput[i-1].DestinationNodes;
+
+            var destinationNodes = node.DestinationNodes; // _convertedInput.Where(x => x.DestinationNodes.Contains(_currentDfsReversedNumber));
             foreach (var dstNodeIndex in destinationNodes)
             {
-                var dstNode = _convertedInput[dstNodeIndex.I - 1];
+                var dstNode = _convertedInput[dstNodeIndex - 1]; //_convertedInput[dstNodeIndex.I - 1];
                 if (!dstNode.Explored)
                 {
-                    _currentDfsReversedNumber = dstNodeIndex.I;
+                    _currentDfsReversedNumber = dstNodeIndex;
                     DfsReversed();
                 }
             }
@@ -220,6 +250,7 @@ namespace SCC
                 if (!dstNode.Explored)
                 {
                     _currentDfsNumber = dstNodeIndex;
+                    PrintIntermediateResult(_currentDfsNumber);
                     Dfs();
                 }
             }            
@@ -235,8 +266,7 @@ namespace SCC
                 if (!_convertedInput[i - 1].Explored)
                 {
                     _currentLeaderNumber = finishingTime;
-                    _currentDfsNumber = i;
-                    PrintIntermediateResult(i);
+                    _currentDfsNumber = i;                    
                     Dfs();
                 }
             }
