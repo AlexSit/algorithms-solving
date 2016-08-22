@@ -24,9 +24,9 @@ namespace _2SumInvariant
                 using (var file = File.OpenText(Path.Combine(basePath, path)))
                 {
                     var text = file.ReadToEnd();
-                    var input = ProcessTestCaseText(text);
+                    var answer = ReadInputAndSolve(text);
 
-                    var answer = GetAnswer(input);
+                    //var answer = GetAnswer(input);
 
                     Console.WriteLine($"Actual ANSWER: {answer}");
                 }
@@ -63,24 +63,52 @@ namespace _2SumInvariant
             return answer.Count;
         }
 
-        private static Hashtable ProcessTestCaseText(string text)
+        private static long ReadInputAndSolve(string text)
         {
-            var input = new Hashtable();
-            var lines = text.Split('\n').Where(x => !string.IsNullOrWhiteSpace(x));
-            foreach (var line in lines)
+            var sums = new Dictionary<long,long>();
+            for (long i = -10000; i <= 10000; i++)
             {
-                var key = long.Parse(line);
+                sums.Add(i, i);
+            }
+
+            long currentSumCount = 0;
+
+            var input = new Hashtable();
+            var lines = text.Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            var linesCount = lines.Count;
+
+            for(var i = 0; i < linesCount; i++)
+            {
+                var key = long.Parse(lines[i]);
                 if (!input.ContainsKey(key))
                 {
                     input.Add(key, true);
                 }
-                else
-                {
-                    input.Remove(key);
-                }
+
+                currentSumCount += CheckSumCriteria(input, key, ref sums);                
             }
 
-            return input;
-        }    
+            return currentSumCount;
+        }
+
+        private static long CheckSumCriteria(Hashtable input, long x, ref Dictionary<long, long> sums)
+        {
+            long foundSumCount = 0;
+            var pairs = sums.ToList();
+            var count = pairs.Count;
+            for (int i = 0; i < count; i++)
+            {                                
+                var t = sums[pairs[i].Key];
+                var y = (t - x);
+                if (input.ContainsKey(y))
+                {
+                    sums.Remove(t);
+                    count--;
+                    foundSumCount++;
+                }                
+            }
+
+            return foundSumCount;
+        }
     }
 }
