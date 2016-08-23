@@ -43,28 +43,31 @@ namespace Median
             for (var i = 0; i < linesCount; i++)
             {
                 var number = int.Parse(lines[i]);
-                AddToHeap(heap, number);
-                var mk = GetMedian(heap);
+                heap.Add(number);
+                var mk = heap.GetMedian();
                 m[i] = mk;
             }
 
             var medianSum = m.Aggregate(0, (i, i1) => i + i1);
             var answer = medianSum%10000;
             return answer;
-        }
-
-        private static int GetMedian(Heap heap)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void AddToHeap(Heap heap, int number)
-        {
-            throw new NotImplementedException();
-        }
+        }        
     }
 
     internal class Heap
     {
+        private readonly SortedDictionary<int, bool>  _sortedDictionary = new SortedDictionary<int, bool>();
+
+        public void Add(int number)
+        {
+            _sortedDictionary.Add(number, true);
+        }
+
+        public int GetMedian()
+        {
+            var count = _sortedDictionary.Count;
+            var medianPosition = count%2 == 0 ? count/2 - 1 : count/2;
+            return _sortedDictionary.ElementAt(medianPosition).Key;
+        }
     }
 }
