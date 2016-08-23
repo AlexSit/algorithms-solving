@@ -13,8 +13,8 @@ namespace Median
             var basePath = "../../inputs";
             var paths = new List<string>
             {                
-                "tc1.txt",                
-                //"median.txt"
+                //"tc1.txt",                
+                "median.txt"
             };
 
             foreach (var path in paths)
