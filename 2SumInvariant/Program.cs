@@ -74,18 +74,15 @@ namespace _2SumInvariant
             long currentSumCount = 0;
 
             var input = new Hashtable();
-            var lines = text.Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            var lines = text.Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).Select(long.Parse).Distinct().ToList();
             var linesCount = lines.Count;
-
+            var min = lines.Min();
+            var max = lines.Max();
             for(var i = 0; i < linesCount; i++)
-            {
-                var key = long.Parse(lines[i]);
-                if (!input.ContainsKey(key))
-                {
-                    input.Add(key, true);
-                }
+            {                
+                input.Add(i, true);                
 
-                currentSumCount += CheckSumCriteria(input, key, ref sums);                
+                currentSumCount += CheckSumCriteria(input, i, ref sums);                
             }
 
             return currentSumCount;
