@@ -1,3 +1,8 @@
+/SCC/inputs/input.txt
+/clustering/inputs/clustering.txt
+/clustering/inputs/clustering_big.txt
+/weight_sum_completion_times/weight_sum_completion_times/inputs/edges.txt
+/weight_sum_completion_times/weight_sum_completion_times/inputs/jobs.txt
 /.vs/Algorithms/v14/*.suo
 /.vs/BinarySearch/v14/*.suo
 *.suo
@@ -6,3 +11,4 @@ Debug
 *.config
 *.pdb
 Release
+
