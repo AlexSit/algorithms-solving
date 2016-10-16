@@ -1,6 +1,24 @@
 import sys
 from union_find import *
 
+def collect_neighbours(cnt_bits, node, clusters, uf):
+    neighbours = []
+    # вычислить соседа с помощью каждого из cnt_bits битов    
+    first_bit_index = 0        
+    while first_bit_index < cnt_bits:
+        neighbour_one_bit_inverted = invert_bit_in_number(node, first_bit_index)                     
+        neighbours.append(neighbour_one_bit_inverted)
+        
+        second_bit_index = first_bit_index + 1
+        while second_bit_index < cnt_bits:
+            if second_bit_index != first_bit_index:
+                neighbour_two_bits_inverted = invert_bit_in_number(neighbour_one_bit_inverted, second_bit_index)                    
+                neighbours.append(neighbour_two_bits_inverted)            
+                second_bit_index+=1
+
+        first_bit_index+=1 
+    return neighbours
+
 def process(input_path):
     input = open(input_path)
     lines = input.read().splitlines()
@@ -23,30 +41,10 @@ def process(input_path):
     print('hamming distances have been read')
 
     spacing = 2
-    for node in clusters:    
-        # вычислить соседа с помощью каждого из cnt_bits битов    
-        first_bit_index = 0        
-        while first_bit_index < cnt_bits:
-            neighbour_one_bit_inverted = invert_bit_in_number(node, first_bit_index)         
-                
-            process_neighbour(clusters, neighbour_one_bit_inverted, uf, node)
-            #neighbour_cnt += 1
-            second_bit_index = first_bit_index + 1
-            while second_bit_index < cnt_bits:
-                if second_bit_index != first_bit_index:
-                    neighbour_two_bits_inverted = invert_bit_in_number(neighbour_one_bit_inverted, second_bit_index)                    
-      
-                    #есть сосед (расстояние от эталона не больше spacing)
-                    #проверить, есть ли в массиве сосед
-                    process_neighbour(clusters, neighbour_two_bits_inverted, uf, node)
-                    
-                    #if test_case:
-                    #    print("{0:b}".format(neighbour_two_bits_inverted))
-                    
-                    #neighbour_cnt += 1
-                    second_bit_index+=1
-            # будем переходить к следующему соседу в следующей итерации    
-            first_bit_index+=1    
+    for node in clusters:            
+        neighbours = collect_neighbours(cnt_bits, node, clusters, uf)
+        for neighbour in neighbours:
+            process_neighbour(clusters, neighbour, uf, node)
 
     cluster_parents = {}
     for el in uf:  
@@ -108,6 +106,7 @@ def is_spacing_exceeded(cnt_bits, x, y, max_distance):
          i += 1 
     
     return differenceCount > max_distance
+
 
 print(sys.version)
 

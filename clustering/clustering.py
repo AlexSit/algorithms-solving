@@ -1,3 +1,5 @@
+# ответ 106
+
 import sys
 
 class Edge:
