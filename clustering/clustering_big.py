@@ -106,7 +106,7 @@ def invert_bit_in_number(number, bit_index):
     else:            
         return (number + 2**bit_index)
 
-def process_neighbour(clusters, neighbour, uf, node):                    
+def process_neighbour(clusters, neighbour, uf, node):                     
     cl_neighbour = uf.find(neighbour)
     cl_ethalon = uf.find(node)
 
