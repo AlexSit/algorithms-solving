@@ -3,13 +3,12 @@ __author__ = 'davide' # https://gist.github.com/DavideCanton/9173142 + @AlexSit 
 import collections
 
 class Element:
-    def __init__(self, number, size=1):        #rank = 0
+    def __init__(self, number, size=1):
         self.number = number
-        self.parent = number
-        #self.rank = rank
+        self.parent = number        
         self.size = size
     def __str__(self):
-        return 'number = %s, parent = %d, size = %d\n' % ("{0:b}".format(self.number), self.parent, self.size) # rank = %d,
+        return 'number = %s, parent = %d, size = %d\n' % ("{0:b}".format(self.number), self.parent, self.size)
 
 class UnionFind:
     def __init__(self, init_list):
@@ -24,17 +23,17 @@ class UnionFind:
             if i == self.elements[i].parent:
                 print("number: " + str(i) + "; " +  str(self.elements[i]) + '; ')
 
-    def find(self, x):
-        #print('FIND: %d' % x)  
+    def find(self, x):        
         cur = x
+        if cur not in self.elements:
+            return None
+
         while cur != self.elements[cur].parent:
             cur = self.elements[cur].parent
         self.elements[x].parent = cur #заодно проставляем родителя
         return self.elements[x]
 
-    def union(self, parent1, parent2):
-        #print('UNION')
-        #print(parent1, parent2, sep=" ")
+    def union(self, parent1, parent2):        
         if self.elements[parent1].size > self.elements[parent2].size:
             self.elements[parent2].parent = parent1            
             self.elements[parent1].size += self.elements[parent2].size
