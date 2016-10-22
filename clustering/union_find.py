@@ -2,6 +2,13 @@ __author__ = 'davide' # https://gist.github.com/DavideCanton/9173142 + @AlexSit 
 
 import collections
 
+class Cluster:
+    def __init__(self, elements = []):
+        self.size = len(elements)
+        self.elements = elements
+    def __str__(self):
+        return 'size = %d, elements_count = %d' % (self.size, len(self.elements))
+
 class Element:
     def __init__(self, number, size=1):
         self.number = number
@@ -13,33 +20,39 @@ class Element:
 class UnionFind:
     def __init__(self, init_list):
         self.elements = {}
+        self.parents = {}
         for i in init_list:
             self.elements[i] = Element(i)
+            self.parents[i] = Cluster([i])
         self.size = len(init_list)
 
-    def printOneItemClusters(self):
-        result = ''      
-        for i in self.elements:            
-            if i == self.elements[i].parent:
-                print("number: " + str(i) + "; " +  str(self.elements[i]) + '; ')
-
-    def find(self, x):        
-        cur = x
-        if cur not in self.elements:
+    def find_parent(self, x):        
+        if x not in self.elements:
             return None
-
-        while cur != self.elements[cur].parent:
-            cur = self.elements[cur].parent
-        self.elements[x].parent = cur #заодно проставляем родителя
-        return self.elements[x]
+        return self.elements[x].parent
 
     def union(self, parent1, parent2):        
-        if self.elements[parent1].size > self.elements[parent2].size:
-            self.elements[parent2].parent = parent1            
-            self.elements[parent1].size += self.elements[parent2].size
+        if self.parents[parent1].size > self.parents[parent2].size:            
+            main_cluster = self.parents[parent1]
+            nested_cluster = self.parents[parent2] 
+            new_parent = parent1
+            obsolete_parent = parent2
         else:
-            self.elements[parent1].parent = parent2
-            self.elements[parent2].size += self.elements[parent1].size
+            main_cluster = self.parents[parent2]
+            nested_cluster = self.parents[parent1]
+            new_parent = parent2            
+            obsolete_parent = parent1            
+
+        #пройтись по каждому элементу внедряемого кластера        
+        for element in nested_cluster.elements:            
+            # изменить ему родителя
+            self.elements[element].parent = new_parent
+            # изменить размер главного кластера на каждый внедряемый элемент
+            main_cluster.size += 1
+            # к главному кластеру добавить внедряемые элементы 
+            main_cluster.elements.append(element)
+        #удалить из parents внедрённый кластер
+        self.parents.pop(obsolete_parent, None)
 
         self.size -= 1
 
@@ -64,5 +77,6 @@ if __name__ == "__main__":
     print(u)
     u.union(10, 13)
     print(u)
-    print(u.find(10))
-    print(u.find(13))
+    print(u.find_parent(10))
+    print(u.find_parent(13))
+    print(u.parents)

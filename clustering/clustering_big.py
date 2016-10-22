@@ -43,20 +43,15 @@ def process(input_path):
     for node in clusters:            
         neighbours = collect_neighbours(cnt_bits, node)        
         for neighbour in neighbours:                        
-            process_neighbour(clusters, neighbour, uf, node)
+            process_neighbour(uf, node, neighbour)
 
-    cluster_parents = {}
-    for el in uf:    
-        if el.parent not in cluster_parents:            
-            cluster_parents[el.parent] = [None, []]
-        cluster_parents[el.parent][1].append(el), 
-
-    cluster_parents_cnt = len(cluster_parents)
+    cluster_parents_cnt = len(uf.parents)    
+    
     print('spacing = %d and cnt_clusters = %d' %  (spacing, cluster_parents_cnt))
     if(expected_answer is not None and cluster_parents_cnt != expected_answer):
         print('WRONG! WRONG! WRONG!');
-
-    print(uf.size)
+    
+    print(uf.size)    
     print('finish')
 
     if False:
@@ -106,15 +101,15 @@ def invert_bit_in_number(number, bit_index):
     else:            
         return (number + 2**bit_index)
 
-def process_neighbour(clusters, neighbour, uf, node):                     
-    cl_neighbour = uf.find(neighbour)
-    cl_ethalon = uf.find(node)
+def process_neighbour(uf, node, neighbour):                     
+    neighbour_parent = uf.find_parent(neighbour)
+    ethalon_parent = uf.find_parent(node)
 
-    if cl_neighbour is None or cl_ethalon is None:
+    if neighbour_parent is None or ethalon_parent is None:
         return
 
-    if cl_neighbour.parent != cl_ethalon.parent:
-        uf.union(cl_neighbour.parent, cl_ethalon.parent)
+    if neighbour_parent != ethalon_parent:
+        uf.union(neighbour_parent, ethalon_parent)
 
 def is_spacing_exceeded(cnt_bits, x, y, max_distance):
     mask = 1
