@@ -40,11 +40,9 @@ class UnionFind:
         else:
             self.elements[parent1].parent = parent2
             self.elements[parent2].size += self.elements[parent1].size
-            #if self.elements[parent1].rank == self.elements[parent2].rank:
-            #    self.elements[parent2].rank += 1
+
         self.size -= 1
-        #print('ITOG')
-        #print(self)
+
     def __len__(self):
         return self.size
 
