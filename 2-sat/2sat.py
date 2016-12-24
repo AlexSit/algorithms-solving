@@ -6,6 +6,10 @@ import random
 import math
 
 
+global clauses
+global assignment
+
+
 def adjust_clause_var(i):
     if i == 0:
         raise ValueError
@@ -14,17 +18,24 @@ def adjust_clause_var(i):
     return i - 1
 
 
-def get_flip_var_pos(unsat_clause_positions, unsat_clauses_len, clauses):
+def get_flip_var_pos(unsat_clause_positions, unsat_clauses_len):
+    global clauses
+
     r1 = random.randint(0, unsat_clauses_len-1)
     r2 = random.randint(0, 1)
     return abs(adjust_clause_var(clauses[unsat_clause_positions[r1]][r2]))    
 
 
-def check_clauses(clauses, clauses_cnt, assignment):
+def check_clause():
+    pass
+
+def check_clauses(clauses_cnt):
+    global clauses
+    global assignment
+
     try:
         unsat_clause_positions = []
-        unsat_clause_positions_cnt = 0
-
+        unsat_clause_positions_cnt = 0        
         for c_index in range(clauses_cnt):
             c = clauses[c_index]
 
@@ -59,17 +70,19 @@ def check_clauses(clauses, clauses_cnt, assignment):
 
     return True
 
-def papadimitrous_algorithm(var_count, clauses):
+def papadimitrous_algorithm(var_count):
+    global clauses
+    global assignment
+
     succeeded = False
     iter_count = round(math.log(var_count, 2))    
-    local_search_iter_count = 2*(var_count**2)
+    local_search_iter_count = 2*(var_count**2)    
     clauses_cnt = len(clauses)
 
     print("iter_count: {}".format(iter_count))
     print("local_search_iter_count: {}".format(local_search_iter_count))
 
     for attempt in range(iter_count):
-        #print(attempt)
         if succeeded:        
             break;
         # initialize array of variables values, assign them with some inital values, uniformly at random
@@ -77,24 +90,19 @@ def papadimitrous_algorithm(var_count, clauses):
         for local_search_index in range(local_search_iter_count):    
             #if local_search_index % 100 == 0:
             #    print(local_search_index)
-            if local_search_index == 100:
-                sys.exit()
-            # check if initial assignment is satisfying
-            #print("1")
+            #if local_search_index == 100:     # NOTE 
+            #    sys.exit()
+            # check if initial assignment is satisfying            
             graphviz = GraphvizOutput()
             graphviz.output_file = './2sat.png'
             with PyCallGraph(output=GraphvizOutput()):
-                unsat_clause_positions = check_clauses(clauses, clauses_cnt, assignment)
-                #print("2")
-                unsat_clauses_len = len(unsat_clause_positions)
-                #print("3")
+                unsat_clause_positions = check_clauses(clauses_cnt)                
+                unsat_clauses_len = len(unsat_clause_positions)                
                 if(not unsat_clauses_len):
                     succeeded = True
-                    #print(assignment)
-                    break;
-                #print("4")   
-                flip_var_pos = get_flip_var_pos(unsat_clause_positions, unsat_clauses_len, clauses)
-                #print("5")
+                    print(assignment)
+                    break;                
+                flip_var_pos = get_flip_var_pos(unsat_clause_positions, unsat_clauses_len)                
                 assignment[flip_var_pos] = not assignment[flip_var_pos]        
 
 
@@ -102,16 +110,19 @@ def papadimitrous_algorithm(var_count, clauses):
 
 
 def main():
-    f = open('./inputs/2sat1.txt')
+    global clauses
+    global assignment
+
+    f = open('./inputs/tests/2-unsat.txt')
     lines = f.read().splitlines()
     var_count = int(lines[0])
 
     # read clauses from the input
     clauses = []
     for i in lines[1:]:
-        clauses.append(tuple( map(int, i.split()) ))    
+        clauses.append(tuple( map(int, i.split()) ))  
 
-    papadimitrous_algorithm(var_count, clauses)    
+    papadimitrous_algorithm(var_count)    
 
 if __name__ == '__main__':    
     main()
