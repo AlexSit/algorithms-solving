@@ -8,6 +8,7 @@ import math
 
 global clauses
 global assignment
+global cnt
 
 
 def adjust_clause_var(i):
@@ -26,37 +27,43 @@ def get_flip_var_pos(unsat_clause_positions, unsat_clauses_len):
     return abs(adjust_clause_var(clauses[unsat_clause_positions[r1]][r2]))    
 
 
-def check_clause():
-    pass
+def check_clause(c_index):
+    global clauses
+
+    c = clauses[c_index]
+
+    has_var1_not_operator = False
+    has_var2_not_operator = False
+    var1_pos = c[0]    
+    var2_pos = c[1]    
+
+    if var1_pos == 0 or var2_pos == 0:
+        raise ValueError
+
+    if var1_pos < 0:
+        has_var1_not_operator = True                
+    var1_pos = abs(adjust_clause_var(var1_pos))
+    if var2_pos < 0:
+        has_var2_not_operator = True                
+    var2_pos = abs(adjust_clause_var(var2_pos))
+
+    val1 = not assignment[var1_pos] if has_var1_not_operator else assignment[var1_pos]
+    val2 = not assignment[var2_pos] if has_var2_not_operator else assignment[var2_pos]
+    return val1 or val2
 
 def check_clauses(clauses_cnt):
     global clauses
     global assignment
+    global cnt
+
+    cnt += 1
 
     try:
         unsat_clause_positions = []
         unsat_clause_positions_cnt = 0        
         for c_index in range(clauses_cnt):
-            c = clauses[c_index]
-
-            has_var1_not_operator = False
-            has_var2_not_operator = False
-            var1_pos = c[0]    
-            var2_pos = c[1]    
-
-            if var1_pos == 0 or var2_pos == 0:
-                raise ValueError
-
-            if var1_pos < 0:
-                has_var1_not_operator = True                
-            var1_pos = abs(adjust_clause_var(var1_pos))
-            if var2_pos < 0:
-                has_var2_not_operator = True                
-            var2_pos = abs(adjust_clause_var(var2_pos))
-
-            val1 = not assignment[var1_pos] if has_var1_not_operator else assignment[var1_pos]
-            val2 = not assignment[var2_pos] if has_var2_not_operator else assignment[var2_pos]
-            if not val1 and not val2:
+            isSat = check_clause(c_index)
+            if not isSat:
                 unsat_clause_positions.append(c_index)
                 unsat_clause_positions_cnt += 1
                 if unsat_clause_positions_cnt == 10: # NOTE let's only collect limited number of unsatisfying clauses 
@@ -73,11 +80,12 @@ def check_clauses(clauses_cnt):
 def papadimitrous_algorithm(var_count):
     global clauses
     global assignment
+    global cnt
 
     succeeded = False
     iter_count = round(math.log(var_count, 2))    
     local_search_iter_count = 2*(var_count**2)    
-    clauses_cnt = len(clauses)
+    clauses_cnt = len(clauses)    
 
     print("iter_count: {}".format(iter_count))
     print("local_search_iter_count: {}".format(local_search_iter_count))
@@ -87,33 +95,32 @@ def papadimitrous_algorithm(var_count):
             break;
         # initialize array of variables values, assign them with some inital values, uniformly at random
         assignment = [bool(random.getrandbits(1)) for i in range(var_count)]    
-        for local_search_index in range(local_search_iter_count):    
-            #if local_search_index % 100 == 0:
-            #    print(local_search_index)
-            #if local_search_index == 100:     # NOTE 
-            #    sys.exit()
+        for local_search_index in range(local_search_iter_count):
             # check if initial assignment is satisfying            
             graphviz = GraphvizOutput()
-            graphviz.output_file = './2sat.png'
+            graphviz.output_file = './output.png'
             with PyCallGraph(output=GraphvizOutput()):
                 unsat_clause_positions = check_clauses(clauses_cnt)                
                 unsat_clauses_len = len(unsat_clause_positions)                
-                if(not unsat_clauses_len):
+                if not unsat_clauses_len:
                     succeeded = True
                     print(assignment)
                     break;                
                 flip_var_pos = get_flip_var_pos(unsat_clause_positions, unsat_clauses_len)                
                 assignment[flip_var_pos] = not assignment[flip_var_pos]        
-
-
+            
     print("succeeded: {}".format(succeeded))
+    print(cnt)
 
 
 def main():
     global clauses
     global assignment
+    global cnt
 
-    f = open('./inputs/tests/2-unsat.txt')
+    cnt = 0
+
+    f = open('./inputs/tests/1.txt')
     lines = f.read().splitlines()
     var_count = int(lines[0])
 
@@ -121,7 +128,7 @@ def main():
     clauses = []
     for i in lines[1:]:
         clauses.append(tuple( map(int, i.split()) ))  
-
+    print('start')
     papadimitrous_algorithm(var_count)    
 
 if __name__ == '__main__':    
