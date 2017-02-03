@@ -89,7 +89,7 @@ def papadimitrous_algorithm(var_count):
     clauses_eval = []
     succeeded = False
     iter_count = round(math.log(var_count, 2))    
-    local_search_iter_count = 2*(var_count**2)    
+    local_search_iter_count = 2*(var_count**2)    # 2*(var_count**2)   
     clauses_cnt = len(clauses)   
 
     print("iter_count: {}".format(iter_count))
@@ -118,7 +118,9 @@ def papadimitrous_algorithm(var_count):
             if not unsat_cnt:
                 succeeded = True                    
                 break;                
-
+            #graphviz = GraphvizOutput()
+            #graphviz.output_file = './output.png'
+            #with PyCallGraph(output=GraphvizOutput()):    
             flipped_var = get_var_to_flip(unsat_clause_positions)                
             assignment[flipped_var] = not assignment[flipped_var]
             for clause_to_check_pos in var_in_clauses[flipped_var]:
@@ -129,7 +131,8 @@ def papadimitrous_algorithm(var_count):
                     unsat_clause_positions.pop(clause_to_check_pos, None)
                 else:        
                     unsat_clause_positions[clause_to_check_pos] = True
-                unsat_cnt += (isSat_old - isSat)                    
+                unsat_cnt += (isSat_old - isSat)    
+                #sys.exit()                
    
     print("succeeded: {}".format(succeeded))
     print("iterations_number: {}".format(iterations_number))
@@ -166,9 +169,8 @@ def main():
         remove = False        
         for v in c:
             v = abs(v)
-            if vars_sign_info.get(v, -1) == 3: # variable has both signs
-                remove = False                                
-            else:            
+            # if in couple at least one variable has only one sign then remove a couple
+            if vars_sign_info.get(v, -1) != 3: # variable has both signs; 1 +; 2 -; 0 - no info           
                 remove = True
         if not remove:
             for t in c:
