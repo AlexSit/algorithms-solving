@@ -12,3 +12,8 @@ Debug
 *.pdb
 Release
 
+inputs
+__pycache__
+/2-sat/pycallgraph.png
+/2-sat/recycle_bin
+/travelling-salesman-problem/output.png
