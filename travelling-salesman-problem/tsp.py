@@ -51,12 +51,14 @@ def tsp(points):
     prev_IntermediatePointsToDestination = SetIndexedByTuple.Clone(IntermediatePointsToDestination)
     for m in range(1, n+1):
         print(f"m: {m}")
-        timestamp = time.time()     
+        tsBefore = time.time()     
         collections = generateTuplesWithoutReturnInAscending(0, n - 1, m)
-        curr_time = time.time()
-        print(curr_time - timestamp)
-        timestamp = curr_time
-        for S in collections:   # LATEST IDEA : THIS BLOCK PROCESSED FOR A LONG TIME
+        tsAfter = time.time()
+        print(tsAfter - tsBefore)
+        tsBefore = time.time()
+        loggingInterval = 30
+        tsStartPoint = time.time()
+        for S in collections:   # LATEST IDEA : THIS BLOCK PROCESSED FOR A LONG TIME            
             intermediatePoints = IntermediatePointsToDestination.Get(S)
             for j in S:
                 if j != 0:
@@ -70,11 +72,16 @@ def tsp(points):
                             if min_result > toDestinationDistances[k] + C[k][j]:
                                 min_result = toDestinationDistances[k] + C[k][j]                                                    
                              
-                    intermediatePoints[j] = min_result # I used A TIP: keep only the last row/column of subproblems, etc.                
+                    intermediatePoints[j] = min_result # I used A TIP: keep only the last row/column of subproblems, etc.
+            tsAfterIteration = time.time()
+            if tsAfterIteration - tsStartPoint > loggingInterval:                
+                print(tsAfterIteration - tsBefore)
+                tsStartPoint = tsAfterIteration
         prev_IntermediatePointsToDestination.Clear()
         prev_IntermediatePointsToDestination = SetIndexedByTuple.Clone(IntermediatePointsToDestination)
         IntermediatePointsToDestination.Clear()
-        print(time.time() - timestamp)
+        tsAfter = time.time()
+        print(tsAfter - tsBefore)
     result = inf
     fullSet = tuple()
     for i in range(n):
