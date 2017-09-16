@@ -45,8 +45,6 @@ def tsp(path, points, distances):
     # graphviz = GraphvizOutput()
     # graphviz.output_file = f'./{path}.png'
     # with PyCallGraph(output=graphviz):  
-    prev_pointsToDst = SetIndexedByTuple.Clone(pointsToDst)
-    # for m in range(1, 4):
     for m in range(1, n+1):
         print(f"m: {m}")
         tsBefore = time.time()     
@@ -55,7 +53,7 @@ def tsp(path, points, distances):
         print(tsAfter - tsBefore)
         tsBefore = time.time()
         loggingInterval = 30
-        tsStartPoint = time.time()
+        tsStartPoint = time.time()        
         for S in collections:   # LATEST IDEA : THIS BLOCK PROCESSED FOR A LONG TIME            
             intermediatePoints = pointsToDst.Get(S)
             for j in S:
@@ -65,7 +63,7 @@ def tsp(path, points, distances):
                         if k != j:        
                             # idea to check if memory is enough (for that sake we omit long calculations)                                            
                             S_without_j = setsAsymDiff(set(S), set([j]))                            
-                            toDestinationDistances = prev_pointsToDst.Get(tuple(S_without_j))                               
+                            toDestinationDistances = pointsToDst.Get(tuple(S_without_j))                               
                             #if k in toDestinationDistances:
                             if min_result > toDestinationDistances[k] + distances[k][j]:
                                 min_result = toDestinationDistances[k] + distances[k][j]                                                    
@@ -75,9 +73,6 @@ def tsp(path, points, distances):
             if tsAfterIteration - tsStartPoint > loggingInterval:                
                 print(tsAfterIteration - tsBefore)
                 tsStartPoint = tsAfterIteration
-        prev_pointsToDst.Clear()
-        prev_pointsToDst = SetIndexedByTuple.Clone(pointsToDst)
-        pointsToDst.Clear()
         tsAfter = time.time()
         print(tsAfter - tsBefore)
     result = inf
@@ -85,7 +80,7 @@ def tsp(path, points, distances):
     for i in range(n):
         fullSet = fullSet + (i,)
     
-    allPointsToDestination = prev_pointsToDst.Get(fullSet)
+    allPointsToDestination = pointsToDst.Get(fullSet)
     print(allPointsToDestination)
     for j in range(1, n):                              
         allPointsToJ = allPointsToDestination[j] 
