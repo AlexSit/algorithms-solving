@@ -10,9 +10,6 @@ from collection_generator import generateTuplesWithoutReturnInAscending
 from pycallgraph import PyCallGraph
 from pycallgraph.output import GraphvizOutput
 
-global pointsToDst
-# global distances
-
 def calcDistance(x1, y1, x2, y2): return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
 
 def calcDistances(points):    
