@@ -76,7 +76,6 @@ def tsp(path, points, distances):
                 print(tsAfterIteration - tsBefore)
                 tsStartPoint = tsAfterIteration
         prev_pointsToDst.Clear()
-        prev_pointsToDst = pointsToDst
         prev_pointsToDst = SetIndexedByTuple.Clone(pointsToDst)
         pointsToDst.Clear()
         tsAfter = time.time()
@@ -118,4 +117,5 @@ for case in cases:
             print('Test case SUCCEEDED!')
         else:
             print('Test case FAILED!')
+            raise Exception(f'{case.path} FAILED!')
     print('--------')
