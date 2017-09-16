@@ -61,29 +61,21 @@ def tsp(points):
         curr_time = time.time()
         print(curr_time - timestamp)
         timestamp = curr_time
-        #print("count(collections) = {}".format(len(collections)))
-        #print("collections = {}".format(collections))
-        #print("count(prev_IntermediatePointsToDestination) = {}".format(prev_IntermediatePointsToDestination.Length()))        
-        #print("count(IntermediatePointsToDestination) = {}".format(IntermediatePointsToDestination.Length()))        
         for S in collections:   # LATEST IDEA : THIS BLOCK PROCESSED FOR A LONG TIME
             intermediatePoints = IntermediatePointsToDestination.Get(S)
-            #print("intermediatePoints <{}> before = {}".format(S, intermediatePoints))           
             for j in S:
                 if j != 0:
                     min_result = inf                    
                     for k in S:
                         if k != j:        
                             # idea to check if memory is enough (for that sake we omit long calculations)                                            
-                            #print('block')
-                            #print("j = {}; k = {}".format(j, k))
                             S_without_j = setsAsymDiff(set(S), set([j]))                            
                             toDestinationDistances = prev_IntermediatePointsToDestination.Get(tuple(S_without_j))                               
                             #if k in toDestinationDistances:
                             if min_result > toDestinationDistances[k] + C[k][j]:
                                 min_result = toDestinationDistances[k] + C[k][j]                                                    
                              
-                    intermediatePoints[j] = min_result #A TIP: keep only the last row/column of subproblems, etc.                
-                #print("intermediatePoints <{}> after +j= {}".format(S, intermediatePoints))
+                    intermediatePoints[j] = min_result # I used A TIP: keep only the last row/column of subproblems, etc.                
         prev_IntermediatePointsToDestination.Clear()
         prev_IntermediatePointsToDestination = SetIndexedByTuple.Clone(IntermediatePointsToDestination)
         IntermediatePointsToDestination.Clear()
