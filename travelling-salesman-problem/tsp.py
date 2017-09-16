@@ -1,6 +1,6 @@
 import sys
 import math
-import test_helper
+from test_helper import *
 import time
 
 # from set_indexed_by_list import SetIndexedByList
@@ -31,16 +31,11 @@ def calcDistances(points):
 
 inf = float('inf')
 
-'''
-paths = [
-    './inputs/1.txt',
-    './inputs/2.txt'    
+inputCases = [
+    InputCase('./inputs/1.txt', True),
+    InputCase('./inputs/2.txt', True),
+    InputCase('./inputs/tsp.txt', False)
 ]
-'''
-paths = [
-    './inputs/tsp.txt',    
-]
-
 
 def setsAsymDiff(set1, set2): # NOTE возвращается сет, а не список
     return set1 ^ set2
@@ -55,7 +50,7 @@ def tsp(points):
     #with PyCallGraph(output=graphviz):  
     prev_IntermediatePointsToDestination = SetIndexedByTuple.Clone(IntermediatePointsToDestination)
     for m in range(1, n+1):
-        print("m: {}".format(m))
+        print(f"m: {m}")
         timestamp = time.time()     
         collections = generateTuplesWithoutReturnInAscending(0, n - 1, m)
         curr_time = time.time()
@@ -100,17 +95,19 @@ def initBaseCase(IntermediatePointsToDestination, n):
         else:
             IntermediatePointsToDestination.Get(tuple([0]))[i] = inf
 
-cases = test_helper.readCases(paths)
+print('!')
+cases = readCases(inputCases)
 
 for case in cases:    
-    print('path: {},\nexpected_answer: {}'.format(case.path, case.answer))
-    C = calcDistances(case.points)    
-    print(C)
+    print(f'path: {case.path},\nexpected_answer: {case.answer}')
+    C = calcDistances(case.points)        
     print('----------')    
 
     actualAnswer = tsp(case.points)
-    print('actualAnswer: {}'.format(actualAnswer) )  
+    print(f'actualAnswer: {actualAnswer}')  
     if(case.answer is not None):
+        if case.roundAnswer:
+            actualAnswer = round(actualAnswer, 2)
         if case.isPassed(actualAnswer):
             print('Test case SUCCEEDED!')
         else:
