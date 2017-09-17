@@ -55,7 +55,7 @@ def tsp(path, points, distances):
         loggingInterval = 30
         tsStartPoint = time.time()       
         for S in collections:   # LATEST IDEA : THIS BLOCK PROCESSED FOR A LONG TIME 
-            intermediatePoints = pointsToDst.Get(S)
+            intermediatePoints = pointsToDst.InitCurr(S)
             for j in S:
                 if j != 0:
                     min_result = inf                    

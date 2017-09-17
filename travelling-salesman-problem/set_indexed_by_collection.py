@@ -48,11 +48,14 @@ class SetIndexedByTuple:
         index = self.createIndex(tuple)
         self._prevCurr[1][index] = value
 
-    def _get(self, tuple, prevOrCurrIndex):
+    def _getOrInitAndReturn(self, prevOrCurrIndex, tuple):
         index = self.createIndex(tuple)        
         if index not in self._prevCurr[prevOrCurrIndex]:
             self._prevCurr[prevOrCurrIndex][index] = [inf for i in range(25)] # OPTIMIZATION LIST OR SET?             
-        return self._prevCurr[prevOrCurrIndex][index]
+        return self._prevCurr[prevOrCurrIndex][index]    
+
+    def InitCurr(self, tuple):
+        return self._getOrInitAndReturn(1, tuple)
 
     def Get(self, tuple):
         index = self.createIndex(tuple)        
@@ -62,7 +65,7 @@ class SetIndexedByTuple:
         return self._prevCurr[0][index]
 
     def SetPrev(self, tuple, i, value):        
-        self._get(tuple, 0)[i] = value
+        self._getOrInitAndReturn(0, tuple)[i] = value
 
     def Length(self):
         return len(self._set)
