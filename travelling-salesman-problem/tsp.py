@@ -4,11 +4,72 @@ from test_helper import *
 import time
 
 # from set_indexed_by_list import SetIndexedByList
-from set_indexed_by_collection import SetIndexedByTuple
 from collection_generator import generateTuplesWithoutReturnInAscending
 
 from pycallgraph import PyCallGraph
 from pycallgraph.output import GraphvizOutput
+
+class SetIndexedByTuple:    
+    def __init__(self):  
+        self._prevCurr = [{}, {}] # SETS      
+
+    def __str__(self):
+        return str(self._prevCurr)
+
+    def  _printPrevCurr(self):
+        prev = self._prevCurr[0]
+        curr = self._prevCurr[1]
+        formattedString = f'---\nprev: {prev}\ncurr: {curr}\n---\n'
+        print(formattedString)
+
+    def CurrToPrev(self):
+        self._prevCurr[0] = self._prevCurr[1]
+        self._prevCurr[1] = {}
+        # for key in self._prevCurr[1].keys(): # OPTIMIZATION
+        #     del self._prevCurr[1][key]
+
+    def _get(self, prevOrCurrIndex, index):
+        return self._prevCurr[prevOrCurrIndex][index]
+    def _set(self, prevOrCurrIndex, index, i, value):
+        self._prevCurr[prevOrCurrIndex][index][i] = value
+    def _exists(self, prevOrCurrIndex, index):
+        return index in self._prevCurr[prevOrCurrIndex]
+    def _initAtIndex(self, prevOrCurrIndex, index):
+        self._prevCurr[prevOrCurrIndex][index] = [inf for i in range(25)] # OPTIMIZATION LIST OR SET?             
+
+    def InitCurr(self, tuple):
+        prevOrCurrIndex = 1
+        index = self.createIndex(tuple)        
+        self._initAtIndex(prevOrCurrIndex, index)
+        return self._get(prevOrCurrIndex, index) 
+
+    def GetPrevIfExists(self, tuple):
+        index = self.createIndex(tuple)
+        prevOrCurrIndex = 0
+        if not self._exists(prevOrCurrIndex, index):
+            return None
+        return self._get(prevOrCurrIndex, index)
+
+    def GetPrev(self, tuple):
+        index = self.createIndex(tuple)
+        return self._get(0, index)
+
+    def SetPrev(self, tuple, i, value): 
+        index = self.createIndex(tuple)
+        prevOrCurrIndex = 0
+        if not self._exists(prevOrCurrIndex, index): 
+            self._initAtIndex(prevOrCurrIndex, index)       
+        self._set(prevOrCurrIndex, index, i, value)
+
+    @classmethod
+    def Clone(cls, toClone):
+        clone = cls()        
+        clone._set = copy.deepcopy(toClone._set)
+        return clone
+
+    def createIndex(self, tuple):
+        return hash(tuple)
+################################################ 
 
 def calcDistance(x1, y1, x2, y2): return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
 
@@ -63,8 +124,9 @@ def tsp(path, points, distances):
                         if k != j:        
                             # idea to check if memory is enough (for that sake we omit long calculations)                                            
                             S_without_j = setsAsymDiff(set(S), set([j]))
-                            toDestinationDistances = pointsToDst.Get(tuple(S_without_j))                               
-                            if min_result > toDestinationDistances[k] + distances[k][j]:
+                                                        
+                            toDestinationDistances = pointsToDst.GetPrevIfExists(tuple(S_without_j))
+                            if toDestinationDistances and min_result > toDestinationDistances[k] + distances[k][j]:
                                 min_result = toDestinationDistances[k] + distances[k][j]                                                    
                              
                     intermediatePoints[j] = min_result # we keep only the last row/column of subproblems, etc.
