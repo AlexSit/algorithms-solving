@@ -1,0 +1,8 @@
+m: 7 - 73 sec
+Memory - 240 MB
+
+Prev&curr optimisation
+m: 7 - 75 sec
+Memory ~ 156 MB
+2) 82, 156 MB
+3) 68, 170 MB

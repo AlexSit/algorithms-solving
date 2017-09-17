@@ -1,11 +1,17 @@
 import math
 inf = float('inf')
 
+class InputCase:
+    def __init__(self, path, roundAnswer):
+        self.path = path
+        self.roundAnswer = roundAnswer
+
 class TestCase:
-    def __init__(self, path, pointsCount):
+    def __init__(self, path, pointsCount, roundAnswer):
         self.path = path
         self.points = []
         self.answer = None
+        self.roundAnswer = roundAnswer
     def __str__(self):
         return str(self.points)  
     def isPassed(self, actual_answer):
@@ -16,13 +22,13 @@ class TestCase:
         (x, y) = tuple(map(float, line.split()))
         self.points.append((x, y))
 
-def readCases(paths):
+def readCases(inputCases):
     cases = []
-    for path in paths:    
+    for case in inputCases:    
         # ------------- Считывание тестового файла --------
-        lines = open(path).read().splitlines()
+        lines = open(case.path).read().splitlines()
         pointsCount = int(lines[0]) # !!!!!!!! NOTE может ли быть несколько параллельных рёбер     
-        case = TestCase(path, pointsCount)
+        case = TestCase(case.path, pointsCount, case.roundAnswer)
         for line in lines[1:]:
             if line.strip() == '':
                 continue
