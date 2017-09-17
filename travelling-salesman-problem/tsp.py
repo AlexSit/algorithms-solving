@@ -41,11 +41,12 @@ def tsp(path, points, distances):
     pointsToDst = SetIndexedByTuple()
     n = len(points)
     initBaseCase(pointsToDst, n)
+    print(pointsToDst)
 
     # graphviz = GraphvizOutput()
     # graphviz.output_file = f'./{path}.png'
     # with PyCallGraph(output=graphviz):  
-    for m in range(1, n+1):
+    for m in range(2, n+1):
         print(f"m: {m}")
         tsBefore = time.time()     
         collections = generateTuplesWithoutReturnInAscending(0, n - 1, m)
@@ -53,8 +54,8 @@ def tsp(path, points, distances):
         print(tsAfter - tsBefore)
         tsBefore = time.time()
         loggingInterval = 30
-        tsStartPoint = time.time()        
-        for S in collections:   # LATEST IDEA : THIS BLOCK PROCESSED FOR A LONG TIME            
+        tsStartPoint = time.time()       
+        for S in collections:   # LATEST IDEA : THIS BLOCK PROCESSED FOR A LONG TIME 
             intermediatePoints = pointsToDst.Get(S)
             for j in S:
                 if j != 0:
@@ -62,17 +63,17 @@ def tsp(path, points, distances):
                     for k in S:
                         if k != j:        
                             # idea to check if memory is enough (for that sake we omit long calculations)                                            
-                            S_without_j = setsAsymDiff(set(S), set([j]))                            
+                            S_without_j = setsAsymDiff(set(S), set([j]))
                             toDestinationDistances = pointsToDst.Get(tuple(S_without_j))                               
-                            #if k in toDestinationDistances:
                             if min_result > toDestinationDistances[k] + distances[k][j]:
                                 min_result = toDestinationDistances[k] + distances[k][j]                                                    
                              
-                    intermediatePoints[j] = min_result # I used A TIP: keep only the last row/column of subproblems, etc.
+                    intermediatePoints[j] = min_result # A TIP: keep only the last row/column of subproblems, etc.
             tsAfterIteration = time.time()
             if tsAfterIteration - tsStartPoint > loggingInterval:                
                 print(tsAfterIteration - tsBefore)
                 tsStartPoint = tsAfterIteration
+        pointsToDst.CurrToPrev()
         tsAfter = time.time()
         print(tsAfter - tsBefore)
     result = inf
@@ -91,9 +92,9 @@ def tsp(path, points, distances):
 def initBaseCase(pointsToDst, n):
     for i in range(n):
         if i == 0:
-            pointsToDst.Get(tuple([0]))[i] = 0            
+            pointsToDst.SetPrev(tuple([0]), i, 0)
         else:
-            pointsToDst.Get(tuple([0]))[i] = inf
+            pointsToDst.SetPrev(tuple([0]), i, inf)
 
 print('!')
 cases = readCases(inputCases)

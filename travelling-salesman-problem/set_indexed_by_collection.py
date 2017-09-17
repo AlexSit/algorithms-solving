@@ -26,24 +26,43 @@ class SetIndexedByList:
         return ','.join(str(num) for num in list)
 
 class SetIndexedByTuple:    
-    def __init__(self):        
-        self._set = {} # HINT TRY USE LIST NOT SEt
+    def __init__(self):  
+        self._prevCurr = [{}, {}] # SETS      
 
     def __str__(self):
-        return str(self._set)
+        return str(self._prevCurr)
+
+    def  _printPrevCurr(self):
+        prev = self._prevCurr[0]
+        curr = self._prevCurr[1]
+        formattedString = f'---\nprev: {prev}\ncurr: {curr}\n---\n'
+        print(formattedString)
+
+    def CurrToPrev(self):
+        self._prevCurr[0] = self._prevCurr[1]
+        self._prevCurr[1] = {}
+        # for key in self._prevCurr[1].keys(): # OPTIMIZATION
+        #     del self._prevCurr[1][key]
 
     def Set(self, tuple, value):          
         index = self.createIndex(tuple)
-        self._set[index] = value
+        self._prevCurr[1][index] = value
+
+    def _get(self, tuple, prevOrCurrIndex):
+        index = self.createIndex(tuple)        
+        if index not in self._prevCurr[prevOrCurrIndex]:
+            self._prevCurr[prevOrCurrIndex][index] = [inf for i in range(25)] # OPTIMIZATION LIST OR SET?             
+        return self._prevCurr[prevOrCurrIndex][index]
 
     def Get(self, tuple):
         index = self.createIndex(tuple)        
-        if index not in self._set:
-            self._set[index] = [inf for i in range(25)] # HINT TRY USE LIST NOT SEt
-        return self._set[index]
+        if index not in self._prevCurr[0]:
+            self._prevCurr[1][index] = [inf for i in range(25)] # OPTIMIZATION LIST OR SET? 
+            return self._prevCurr[1][index]
+        return self._prevCurr[0][index]
 
-    def Clear(self):
-        self._set.clear()
+    def SetPrev(self, tuple, i, value):        
+        self._get(tuple, 0)[i] = value
 
     def Length(self):
         return len(self._set)
