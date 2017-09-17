@@ -6,3 +6,5 @@ m: 7 - 75 sec
 Memory ~ 156 MB
 2) 82, 156 MB
 3) 68, 170 MB
+
+!m11 - 1020 sec - Memory Error (Don't know how much used)

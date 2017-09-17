@@ -41,7 +41,6 @@ def tsp(path, points, distances):
     pointsToDst = SetIndexedByTuple()
     n = len(points)
     initBaseCase(pointsToDst, n)
-    print(pointsToDst)
 
     # graphviz = GraphvizOutput()
     # graphviz.output_file = f'./{path}.png'
@@ -68,7 +67,7 @@ def tsp(path, points, distances):
                             if min_result > toDestinationDistances[k] + distances[k][j]:
                                 min_result = toDestinationDistances[k] + distances[k][j]                                                    
                              
-                    intermediatePoints[j] = min_result # A TIP: keep only the last row/column of subproblems, etc.
+                    intermediatePoints[j] = min_result # we keep only the last row/column of subproblems, etc.
             tsAfterIteration = time.time()
             if tsAfterIteration - tsStartPoint > loggingInterval:                
                 print(tsAfterIteration - tsBefore)
