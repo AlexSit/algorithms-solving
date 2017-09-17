@@ -44,25 +44,35 @@ class SetIndexedByTuple:
         # for key in self._prevCurr[1].keys(): # OPTIMIZATION
         #     del self._prevCurr[1][key]
 
-    def Set(self, tuple, value):          
-        index = self.createIndex(tuple)
-        self._prevCurr[1][index] = value
+    def _get(self, prevOrCurrIndex, index):
+        return self._prevCurr[prevOrCurrIndex][index]
+    def _exists(self, prevOrCurrIndex, index):
+        return index in self._prevCurr[prevOrCurrIndex]
+    def _initAtIndex(self, prevOrCurrIndex, index):
+        self._prevCurr[prevOrCurrIndex][index] = [inf for i in range(25)] # OPTIMIZATION LIST OR SET?             
+
+    def _initAndReturn(self, prevOrCurrIndex, tuple):
+        index = self.createIndex(tuple)        
+        if not self._exists(prevOrCurrIndex, index):
+            self._initAtIndex(prevOrCurrIndex, index)
+        return self._get(prevOrCurrIndex, index)    
+
+    def InitCurr(self, tuple):
+        return self._initAndReturn(1, tuple)
+
+    def Get(self, tuple):
+        index = self.createIndex(tuple)        
+        if index not in self._prevCurr[0]:
+            # self._prevCurr[1][index] = [inf for i in range(25)] # OPTIMIZATION LIST OR SET? 
+            # return self._prevCurr[1][index]
+            return [inf for i in range(25)]
+        return self._prevCurr[0][index]
 
     def _getOrInitAndReturn(self, prevOrCurrIndex, tuple):
         index = self.createIndex(tuple)        
         if index not in self._prevCurr[prevOrCurrIndex]:
             self._prevCurr[prevOrCurrIndex][index] = [inf for i in range(25)] # OPTIMIZATION LIST OR SET?             
         return self._prevCurr[prevOrCurrIndex][index]    
-
-    def InitCurr(self, tuple):
-        return self._getOrInitAndReturn(1, tuple)
-
-    def Get(self, tuple):
-        index = self.createIndex(tuple)        
-        if index not in self._prevCurr[0]:
-            self._prevCurr[1][index] = [inf for i in range(25)] # OPTIMIZATION LIST OR SET? 
-            return self._prevCurr[1][index]
-        return self._prevCurr[0][index]
 
     def GetPrev(self, tuple):
         return self._getOrInitAndReturn(0, tuple)
