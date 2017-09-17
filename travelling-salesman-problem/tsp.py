@@ -80,7 +80,7 @@ def tsp(path, points, distances):
     for i in range(n):
         fullSet = fullSet + (i,)
     
-    allPointsToDestination = pointsToDst.Get(fullSet)
+    allPointsToDestination = pointsToDst.GetPrev(fullSet)
     print(allPointsToDestination)
     for j in range(1, n):                              
         allPointsToJ = allPointsToDestination[j] 

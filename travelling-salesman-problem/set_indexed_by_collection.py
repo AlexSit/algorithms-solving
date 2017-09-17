@@ -64,6 +64,9 @@ class SetIndexedByTuple:
             return self._prevCurr[1][index]
         return self._prevCurr[0][index]
 
+    def GetPrev(self, tuple):
+        return self._getOrInitAndReturn(0, tuple)
+
     def SetPrev(self, tuple, i, value):        
         self._getOrInitAndReturn(0, tuple)[i] = value
 
